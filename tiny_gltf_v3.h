@@ -1214,6 +1214,8 @@ ParseGenerator tg3_parse_coro(
 #endif /* coroutines */
 #endif /* __cplusplus */
 
+#endif /* TINY_GLTF_V3_H_ */
+
 /* ======================================================================
  * Section 18: Implementation
  * ====================================================================== */
@@ -4432,5 +4434,3 @@ TINYGLTF3_API void tg3_writer_destroy(tg3_writer *w) {
 }
 
 #endif /* TINYGLTF3_IMPLEMENTATION */
-
-#endif /* TINY_GLTF_V3_H_ */
