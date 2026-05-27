@@ -388,8 +388,13 @@ static uint8_t *tg3__decode_data_uri(tg3_arena *arena, const char *uri, uint32_t
 static int32_t tg3__fs_file_exists(const char *path, uint32_t path_len, void *ud) {
     FILE *fp;
     (void)path_len; (void)ud;
+#ifdef _MSC_VER
+    errno_t err = fopen_s(&fp, path, "rb");
+    if (err == 0 || !fp) return 0;
+#else
     fp = fopen(path, "rb");
     if (!fp) return 0;
+#endif
     fclose(fp);
     return 1;
 }
@@ -403,8 +408,13 @@ static int32_t tg3__fs_read_file(uint8_t **out_data, uint64_t *out_size,
     (void)path_len; (void)ud;
     *out_data = NULL;
     *out_size = 0;
+#ifdef _MSC_VER
+    errno_t err = fopen_s(&fp, path, "rb");
+    if (err == 0 || !fp) return 0;
+#else
     fp = fopen(path, "rb");
     if (!fp) return 0;
+#endif
     if (fseek(fp, 0, SEEK_END) != 0) { fclose(fp); return 0; }
     size = ftell(fp);
     if (size < 0) { fclose(fp); return 0; }
@@ -428,8 +438,13 @@ static int32_t tg3__fs_write_file(const char *path, uint32_t path_len,
     FILE *fp;
     size_t nwritten;
     (void)path_len; (void)ud;
+#ifdef _MSC_VER
+    errno_t err = fopen_s(&fp, path, "wb");
+    if (err == 0 || !fp) return 0;
+#else
     fp = fopen(path, "wb");
     if (!fp) return 0;
+#endif
     nwritten = fwrite(data, 1, (size_t)size, fp);
     fclose(fp);
     return nwritten == (size_t)size ? 1 : 0;
