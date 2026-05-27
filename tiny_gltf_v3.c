@@ -390,7 +390,7 @@ static int32_t tg3__fs_file_exists(const char *path, uint32_t path_len, void *ud
     (void)path_len; (void)ud;
 #ifdef _MSC_VER
     errno_t err = fopen_s(&fp, path, "rb");
-    if (err == 0 || !fp) return 0;
+    if (err != 0 || !fp) return 0;
 #else
     fp = fopen(path, "rb");
     if (!fp) return 0;
@@ -410,7 +410,7 @@ static int32_t tg3__fs_read_file(uint8_t **out_data, uint64_t *out_size,
     *out_size = 0;
 #ifdef _MSC_VER
     errno_t err = fopen_s(&fp, path, "rb");
-    if (err == 0 || !fp) return 0;
+    if (err != 0 || !fp) return 0;
 #else
     fp = fopen(path, "rb");
     if (!fp) return 0;
@@ -440,7 +440,7 @@ static int32_t tg3__fs_write_file(const char *path, uint32_t path_len,
     (void)path_len; (void)ud;
 #ifdef _MSC_VER
     errno_t err = fopen_s(&fp, path, "wb");
-    if (err == 0 || !fp) return 0;
+    if (err != 0 || !fp) return 0;
 #else
     fp = fopen(path, "wb");
     if (!fp) return 0;
