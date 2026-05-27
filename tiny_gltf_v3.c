@@ -13,6 +13,10 @@
 #define TG3__ARENA_DEFAULT_BLOCK_SIZE (256u * 1024u)
 #define TG3__ARENA_ALIGNMENT 8u
 
+#ifndef _FILE_OFFSET_BITS
+#define _FILE_OFFSET_BITS 64
+#endif
+
 typedef struct tg3__arena_block {
     struct tg3__arena_block *next;
     uint8_t *base;
@@ -402,7 +406,7 @@ static int32_t tg3__fs_file_exists(const char *path, uint32_t path_len, void *ud
 static int32_t tg3__fs_read_file(uint8_t **out_data, uint64_t *out_size,
                                  const char *path, uint32_t path_len, void *ud) {
     FILE *fp;
-    long size;
+    int64_t size;
     uint8_t *data;
     size_t nread;
     (void)path_len; (void)ud;
@@ -415,10 +419,20 @@ static int32_t tg3__fs_read_file(uint8_t **out_data, uint64_t *out_size,
     fp = fopen(path, "rb");
     if (!fp) return 0;
 #endif
-    if (fseek(fp, 0, SEEK_END) != 0) { fclose(fp); return 0; }
-    size = ftell(fp);
+#ifdef _WIN32
+    if (_fseeki64(fp, 0, SEEK_END) != 0) { fclose(fp); return 0; }
+    size = _ftelli64(fp);
+#else
+    if (fseeko(fp, 0, SEEK_END) != 0) { fclose(fp); return 0; }
+    size = ftello(fp);
+#endif
     if (size < 0) { fclose(fp); return 0; }
-    if (fseek(fp, 0, SEEK_SET) != 0) { fclose(fp); return 0; }
+    if ((uint64_t)size > (size_t)-1) { fclose(fp); return 0; }
+#ifdef _WIN32
+    if (_fseeki64(fp, 0, SEEK_SET) != 0) { fclose(fp); return 0; }
+#else
+    if (fseeko(fp, 0, SEEK_SET) != 0) { fclose(fp); return 0; }
+#endif
     data = (uint8_t *)malloc((size_t)size);
     if (!data) { fclose(fp); return 0; }
     nread = fread(data, 1, (size_t)size, fp);
